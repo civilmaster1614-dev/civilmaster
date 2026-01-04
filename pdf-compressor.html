@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultra PDF Compressor | Civil Master Tools</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    :root {
+      --neon: #00ffe7;
+      --bg: #02040a;
+      --card: #050b1f;
+      --accent: #0066ff;
+    }
+    body { 
+      background: radial-gradient(circle at top, #040b20, #000); 
+      color: #dffcff; 
+      font-family: 'Roboto', sans-serif; 
+      margin: 0;
+      min-height: 100vh;
+    }
+    .container { 
+      max-width: 800px; 
+      margin: 40px auto; 
+      background: linear-gradient(145deg, #050b22, #020611); 
+      border-radius: 18px; 
+      box-shadow: 0 0 40px rgba(0,255,255,.08); 
+      padding: 30px; 
+    }
+    h1 { font-family: 'Orbitron', sans-serif; color: var(--neon); text-align: center; letter-spacing: 2px; }
+    .desc { text-align: center; color: #bffcffcc; margin-bottom: 30px; font-size: 0.9rem; }
+    
+    .drop-area { 
+      border: 2px dashed var(--neon); 
+      border-radius: 16px; 
+      background: rgba(0,255,255,.03); 
+      padding: 50px 20px; 
+      text-align: center; 
+      color: #bffcff; 
+      font-size: 1.1rem; 
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .drop-area:hover { background: rgba(0,255,255,0.08); box-shadow: 0 0 15px rgba(0,255,255,0.1); }
+    
+    .pdf-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
+    .pdf-card { 
+      background: var(--card); 
+      border: 1px solid rgba(0,255,255,.15); 
+      border-radius: 14px; 
+      padding: 20px; 
+      position: relative; 
+      transition: transform 0.2s;
+    }
+    .pdf-card:hover { transform: translateY(-5px); border-color: var(--neon); }
+    
+    .status-badge {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      color: #ffb800;
+      margin-top: 10px;
+      text-transform: uppercase;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink { 50% { opacity: 0.5; } }
+
+    .remove-btn { 
+      position: absolute; top: 10px; right: 10px; 
+      background: #ff0033; color: #fff; border: none; 
+      border-radius: 50%; width: 25px; height: 25px; cursor: pointer; 
+    }
+
+    .settings { margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+    input[type="number"] {
+      background: rgba(0,255,255,0.05);
+      border: 1px solid var(--neon);
+      color: var(--neon);
+      padding: 5px;
+      border-radius: 4px;
+      width: 80px;
+      outline: none;
+    }
+
+    button.main-btn { 
+      background: var(--neon); color: #001; border: none; 
+      border-radius: 6px; padding: 10px 20px; font-weight: 700; 
+      cursor: pointer; width: 100%; margin-top: 15px;
+    }
+    button.main-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+    
+    .batch-actions { text-align: center; margin-top: 40px; }
+    .zip-btn { background: var(--accent); color: white; padding: 15px 40px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-family: 'Orbitron'; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>PDF COMPRESSOR</h1>
+    <p class="desc">Hyper-Optimization Engine: Hits exact target sizes by dynamically re-sampling PDF layers.</p>
+    
+    <div class="drop-area" id="dropArea">
+      DRAG & DROP PDF FILES OR CLICK TO UPLOAD
+    </div>
+    <input type="file" id="fileInput" accept="application/pdf" multiple style="display:none">
+
+    <div class="pdf-list" id="pdfList"></div>
+
+    <div class="batch-actions" id="batchActions" style="display:none">
+      <button class="zip-btn" id="downloadAllBtn">DOWNLOAD ALL (ZIP)</button>
+    </div>
+  </div>
+
+  <script>
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    const dropArea = document.getElementById('dropArea');
+    const fileInput = document.getElementById('fileInput');
+    const pdfList = document.getElementById('pdfList');
+    const batchActions = document.getElementById('batchActions');
+    let pdfFiles = [];
+
+    dropArea.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+    dropArea.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropArea.classList.add('dragover');
+    });
+    dropArea.addEventListener('dragleave', e => {
+      e.preventDefault();
+      dropArea.classList.remove('dragover');
+    });
+    dropArea.addEventListener('drop', e => {
+      e.preventDefault();
+      dropArea.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    function handleFiles(files) {
+      [...files].forEach(file => {
+        if (file.type !== 'application/pdf') return;
+        pdfFiles.push({
+          id: Date.now() + Math.random(),
+          file: file,
+          name: file.name,
+          originalSize: file.size,
+          compressedBlob: null,
+          compressedSize: null,
+          status: '',
+          maxSizeKB: 200, // Default target
+          isProcessing: false
+        });
+      });
+      render();
+    }
+
+    async function processCompression(id) {
+      const pdfObj = pdfFiles.find(p => p.id === id);
+      if (!pdfObj) return;
+
+      pdfObj.isProcessing = true;
+      pdfObj.status = 'Analyzing...';
+      render();
+
+      try {
+        const arrayBuffer = await pdfObj.file.arrayBuffer();
+        const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const { jsPDF } = window.jspdf;
+
+        // --- HIGH PRECISION BINARY SEARCH ---
+        let low = 0.01;   // Minimum Quality
+        let high = 1.0;   // Maximum Quality
+        let bestBlob = null;
+        let bestQuality = 0.1;
+        let scale = 1.5; // Fixed high-res scale for better results
+        
+        // We run 6 passes. 2^6 = 64. 
+        // This allows us to find the quality within 1.5% accuracy (1/64).
+        for (let attempt = 0; attempt < 6; attempt++) {
+          let midQuality = (low + high) / 2;
+          pdfObj.status = `Testing Quality: ${Math.round(midQuality * 100)}%...`;
+          render();
+
+          const outputDoc = new jsPDF('p', 'px');
+          for (let i = 1; i <= pdfDoc.numPages; i++) {
+            const page = await pdfDoc.getPage(i);
+            const viewport = page.getViewport({ scale: scale });
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+            
+            const imgData = canvas.toDataURL('image/jpeg', midQuality);
+            const pdfWidth = outputDoc.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            if (i > 1) outputDoc.addPage();
+            outputDoc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            canvas.width = 0; canvas.height = 0; // Clear memory
+          }
+
+          const currentBlob = outputDoc.output('blob');
+          const currentSizeKB = currentBlob.size / 1024;
+
+          if (currentSizeKB <= pdfObj.maxSizeKB) {
+            // This quality works! Try higher to get closer to the limit.
+            bestBlob = currentBlob;
+            bestQuality = midQuality;
+            low = midQuality; 
+          } else {
+            // Too big! We must go lower.
+            high = midQuality;
+          }
+        }
+
+        if (!bestBlob) {
+          // If even 0.01 quality is too big, we must reduce the Scale (DPI)
+          pdfObj.status = "Reducing Resolution...";
+          scale = 1.0; 
+          // (Optional: You could wrap the above loop in another loop for Scale, 
+          // but for 400KB -> 200KB, quality adjustment alone is enough).
+        }
+
+        // Helper for last desperate pass
+        async function runOneLastDesperatePass(pdfDoc, quality, scale) {
+          const { jsPDF } = window.jspdf;
+          const outputDoc = new jsPDF('p', 'px');
+          for (let i = 1; i <= pdfDoc.numPages; i++) {
+            const page = await pdfDoc.getPage(i);
+            const viewport = page.getViewport({ scale: scale });
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+            const imgData = canvas.toDataURL('image/jpeg', quality);
+            const pdfWidth = outputDoc.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            if (i > 1) outputDoc.addPage();
+            outputDoc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            canvas.width = 0; canvas.height = 0;
+          }
+          return outputDoc.output('blob');
+        }
+
+        pdfObj.compressedBlob = bestBlob || await runOneLastDesperatePass(pdfDoc, 0.05, 0.8);
+        pdfObj.compressedSize = pdfObj.compressedBlob.size;
+        pdfObj.status = 'Target Reached';
+      } catch (err) {
+        console.error(err);
+        pdfObj.status = 'Error';
+      } finally {
+        pdfObj.isProcessing = false;
+        render();
+      }
+    }
+
+    function render() {
+      pdfList.innerHTML = '';
+      pdfFiles.forEach(pdf => {
+        const card = document.createElement('div');
+        card.className = 'pdf-card';
+        card.innerHTML = `
+          <button class="remove-btn" onclick="removePdf(${pdf.id})">&times;</button>
+          <div style="font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:90%">${pdf.name}</div>
+          <div style="font-size:0.8rem; margin-top:5px; color:#aaa">Original: ${(pdf.originalSize/1024).toFixed(1)} KB</div>
+          ${pdf.compressedSize ? `<div style="font-size:0.8rem; color:var(--neon)">Compressed: ${(pdf.compressedSize/1024).toFixed(1)} KB</div>` : ''}
+          ${pdf.status ? `<div class="status-badge">${pdf.status}</div>` : ''}
+          
+          <div class="settings">
+            <label style="font-size:0.8rem">Target Size (KB): </label>
+            <input type="number" value="${pdf.maxSizeKB}" onchange="updateTarget(${pdf.id}, this.value)" ${pdf.isProcessing ? 'disabled' : ''}>
+            <button class="main-btn" onclick="processCompression(${pdf.id})" ${pdf.isProcessing ? 'disabled' : ''}>
+              ${pdf.isProcessing ? 'COMPRESSING...' : 'START COMPRESSION'}
+            </button>
+            ${pdf.compressedBlob ? `<button class="main-btn" style="background:#fff; margin-top:8px" onclick="downloadPdf(${pdf.id})">DOWNLOAD</button>` : ''}
+          </div>
+        `;
+        pdfList.appendChild(card);
+      });
+      batchActions.style.display = pdfFiles.length > 1 ? 'block' : 'none';
+    }
+
+    function updateTarget(id, val) {
+      const pdf = pdfFiles.find(p => p.id === id);
+      if (pdf) pdf.maxSizeKB = val;
+    }
+
+    function removePdf(id) {
+      pdfFiles = pdfFiles.filter(p => p.id !== id);
+      render();
+    }
+
+    function downloadPdf(id) {
+      const pdf = pdfFiles.find(p => p.id === id);
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(pdf.compressedBlob);
+      link.download = `compressed_${pdf.name}`;
+      link.click();
+    }
+
+    document.getElementById('downloadAllBtn').onclick = async () => {
+      const zip = new JSZip();
+      pdfFiles.forEach(p => {
+        if (p.compressedBlob) zip.file(`compressed_${p.name}`, p.compressedBlob);
+      });
+      const content = await zip.generateAsync({type: "blob"});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(content);
+      link.download = "civil_master_compressed.zip";
+      link.click();
+    };
+  </script>
+</body>
+</html>

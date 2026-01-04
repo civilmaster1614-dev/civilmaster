@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Civil Master | Next-Gen Engineering Suite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+:root{--neon:#00ffe7;--bg:#02040a;--card:#050b1f}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Roboto',sans-serif;background:radial-gradient(circle at top,#040b20,#000);color:#dffcff;overflow-x:hidden}
+header{position:sticky;top:0;z-index:50;display:flex;justify-content:space-between;align-items:center;padding:18px 40px;background:rgba(2,6,20,.7);backdrop-filter:blur(14px);border-bottom:1px solid rgba(0,255,255,.2)}
+.logo{font-family:'Orbitron',sans-serif;color:var(--neon);font-size:1.4rem;letter-spacing:2px}
+nav a{margin-left:24px;color:#bffcff;text-decoration:none;font-weight:500;position:relative}
+nav a::after{content:"";position:absolute;left:0;bottom:-6px;width:0;height:2px;background:var(--neon);transition:.3s}
+nav a:hover::after{width:100%}
+.tools-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.tools-btn {
+  background: none;
+  border: none;
+  color: #bffcff;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  margin-left: 24px;
+  cursor: pointer;
+  padding: 0;
+}
+.tools-btn:after {
+  content: '\25BC';
+  font-size: 0.7em;
+  margin-left: 6px;
+}
+.tools-list {
+  display: none;
+  position: absolute;
+  top: 120%;
+  right: 0;
+  left: auto;
+  background: #050b1f;
+  border: 1px solid rgba(0,255,255,.18);
+  border-radius: 10px;
+  min-width: 160px;
+  box-shadow: 0 8px 24px rgba(0,255,255,.08);
+  z-index: 100;
+}
+.tools-list a {
+  display: block;
+  color: #bffcff;
+  padding: 12px 18px;
+  text-decoration: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1rem;
+  border-bottom: 1px solid rgba(0,255,255,.08);
+  transition: background .2s;
+}
+.tools-list a:last-child { border-bottom: none; }
+.tools-list a:hover {
+  background: rgba(0,255,255,.08);
+  color: var(--neon);
+}
+.tools-dropdown.open .tools-list {
+  display: block;
+}
+.hero{min-height:90vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 20px}
+.hero h1{font-family:'Orbitron';font-size:3rem;color:var(--neon);text-shadow:0 0 30px rgba(0,255,255,.4)}
+.hero p{max-width:820px;font-size:1.15rem;line-height:1.8;color:#d0faffcc}
+.cta-btn{margin-top:28px;padding:14px 36px;border-radius:40px;background:linear-gradient(135deg,#00ffe7,#0066ff);color:#001;text-decoration:none;font-weight:700;box-shadow:0 0 40px rgba(0,255,255,.5)}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:32px;padding:100px 60px}
+.feature-card{background:linear-gradient(145deg,#050b22,#020611);border:1px solid rgba(0,255,255,.25);border-radius:18px;padding:32px;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,255,255,.05)}
+.feature-card::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent,rgba(0,255,255,.18),transparent);transform:translateX(-100%)}
+.feature-card:hover::before{transform:translateX(100%);transition:.8s}
+.feature-card h3{font-family:'Orbitron';color:var(--neon)}
+.alien-divider{display:flex;align-items:center;justify-content:center;margin:120px 0;color:var(--neon);font-family:'Orbitron'}
+.alien-divider::before,.alien-divider::after{content:"";flex:1;height:2px;background:linear-gradient(90deg,transparent,var(--neon))}
+.alien-divider span{padding:0 20px;letter-spacing:4px}
+footer{text-align:center;padding:40px 20px;color:#8fdfe0;background:#000}
+#alienField{position:fixed;inset:0;z-index:-1}
+[data-alien]{opacity:0;transform:translateY(50px) scale(.95);transition:1.2s cubic-bezier(.19,1,.22,1)}
+[data-alien].active{opacity:1;transform:none}
+@media(max-width:768px){.hero h1{font-size:2.2rem}.features{padding:60px 20px}}
+@media (max-width: 700px) {
+  .container {
+    padding: 12px 2vw 32px 2vw;
+    max-width: 98vw;
+  }
+  .feature-card {
+    padding: 18px;
+    font-size: 0.98rem;
+    max-width: 98vw;
+  }
+  .cta-btn, .zip-btn, button {
+    padding: 14px 36px;
+    font-size: 1.1rem;
+    width: auto;
+    max-width: 100vw;
+    box-sizing: border-box;
+    word-break: break-word;
+  }
+  .tools-list {
+    left: auto;
+    right: 0;
+    min-width: 160px;
+    font-size: 1rem;
+  }
+}
+@media (max-width: 500px) {
+  .container {
+    padding: 6px 1vw 18px 1vw;
+    max-width: 100vw;
+  }
+  .feature-card {
+    padding: 10px;
+    font-size: 0.92rem;
+    max-width: 100vw;
+  }
+  .cta-btn, .zip-btn, button {
+    padding: 14px 36px;
+    font-size: 1.1rem;
+    width: auto;
+    max-width: 100vw;
+  }
+  .tools-list {
+    left: auto;
+    right: 0;
+    min-width: 140px;
+    font-size: 1rem;
+  }
+}
+/* App Card Styles */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@300;600&display=swap');
+.item {
+    min-width: 100px;
+    width: 100px;
+    position: relative;
+    vertical-align: top;
+    margin: 10px 10px 10px 0;
+    white-space: normal;
+    line-height: 1.2;
+}
+.item figure {
+    width: auto;
+    height: 100px;
+    margin: 0 0 10px;
+    text-align: center;
+    cursor: pointer;
+}
+.item figure img {
+    width: 100px;
+    height: auto;
+    border-radius: 5px;
+}
+.item div.name {
+    font-family: 'Roboto Slab', serif;
+    color: #333333;
+    font-size: 14px;
+    font-weight: 600;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-align: center;
+}
+.item div.name a {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+.item div.description {
+    font-family: 'Roboto Slab',serif;
+    color: #999;
+    font-size: 12px;
+    font-weight: 300;
+    margin-top: 5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-align: center;
+}
+  </style>
+
+</head>
+<body class="deep-space">
+<canvas id="alienField"></canvas>
+  <header>
+    <div class="logo">Civil Master</div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#about">About</a>
+      <a href="#download">Download</a>
+      <a href="#contact">Contact</a>
+      <div class="tools-dropdown" id="toolsDropdown">
+        <button class="tools-btn" onclick="toggleToolsDropdown()">Tools</button>
+        <div class="tools-list">
+          <a href="image-compressor.html">Image Compressor</a>
+          <a href="pdf-compressor.html">PDF Compressor</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero" data-alien>
+    <h1>Smart Learning Platform for Civil Engineers</h1>
+    <p>Prepare smarter for Public Service, BCE, ME Entrance, and License exams with subject-wise MCQs, practice quizzes, detailed explanations, and performance tracking — all in one powerful learning software.</p>
+    <a href="#download" class="cta-btn">Download Now</a>
+  </section>
+
+  <section class="features" id="features" data-alien>
+    <div class="feature-card">
+      <div class="sci-fi-glow"></div>
+      <h3>Public Service Exam Prep</h3>
+      <p>Specialized for civil engineering students: subject-wise notes, practice sets, and detailed question explanations for public service exams.</p>
+    </div>
+    <div class="feature-card">
+      <div class="sci-fi-glow"></div>
+      <h3>BCE Course Support</h3>
+      <p>Full support for BCE courses: access notes, videos, and past questions tailored for Bachelor in Civil Engineering students.</p>
+    </div>
+    <div class="feature-card">
+      <div class="sci-fi-glow"></div>
+      <h3>ME Entrance Preparation</h3>
+      <p>Master in Engineering entrance prep: well-designed notes, practice sets, and weekly tests to help you succeed.</p>
+    </div>
+    <div class="feature-card">
+      <div class="sci-fi-glow"></div>
+      <h3>Civil Engineering License Exam</h3>
+      <p>Robust platform for license exam prep: practice sets, subject-wise and topic-wise questions, and a vast collection of past questions.</p>
+    </div>
+    <div class="feature-card">
+      <div class="sci-fi-glow"></div>
+      <h3>Library & Bookmarks</h3>
+      <p>Access all notes in a dedicated library. Bookmark important questions by subject and review your answers anytime.</p>
+    </div>
+    <div class="feature-card">
+      <div class="sci-fi-glow"></div>
+      <h3>Student-Centric & Collaborative</h3>
+      <p>App made by students for students, in collaboration with top professors. Submit your own sets and help shape the platform.</p>
+    </div>
+    <div class="feature-card">
+      <div class="sci-fi-glow"></div>
+      <h3>Modern UI & Mobile Ready</h3>
+      <p>Attractive, easy-to-use interface. Mobile version coming soon for learning on the go!</p>
+    </div>
+  </section>
+
+  <section id="about" data-alien style="text-align:center; margin: 80px 20px; max-width:900px; margin-left:auto; margin-right:auto;">
+    <h2 style="font-family:'Orbitron',sans-serif; color:#00ffe7; font-size:2rem; margin-bottom:22px;">About Civil Master</h2>
+    <p style="color:#e0e6edcc; font-size:1.1rem; line-height:1.8;">
+      <strong>Civil Master</strong> is an interactive learning software for Civil Engineering students and professionals preparing for different competitive and academic exams. It features subject-wise MCQs, practice quizzes, and performance tracking to make exam preparation efficient, structured, and engaging.
+    </p>
+    <p style="color:#e0e6edcc; font-size:1.05rem; line-height:1.7; margin-top:18px;">
+      <strong>Developer:</strong> Er. Deepak Raj Joshi, Tribhuvan University, Nepal<br>
+      <strong>Technical Mentorship:</strong> GPT Technical Mentor (AI Assistant)
+    </p>
+  </section>
+
+  <!-- Testimonials -->
+  <section id="testimonials" style="margin:80px 20px; max-width:1100px; margin-left:auto; margin-right:auto;">
+    <h2 style="font-family:'Orbitron',sans-serif; color:#00ffe7; text-align:center; font-size:2rem; margin-bottom:40px;">What Users Say</h2>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:30px;">
+      <div class="feature-card"><p>"Civil Master helped me crack my Public Service exam. The MCQs and explanations are excellent."</p><strong>- Civil Engineering Graduate</strong></div>
+      <div class="feature-card"><p>"A very structured and practical tool for BCE and License exam preparation."</p><strong>- Assistant Professor, TU</strong></div>
+      <div class="feature-card"><p>"Performance tracking keeps students motivated and exam-ready."</p><strong>- Practicing Civil Engineer</strong></div>
+    </div>
+  </section>
+
+  <!-- Demo -->
+  <section id="demo" style="text-align:center; margin:80px 20px;">
+    <h2 style="font-family:'Orbitron',sans-serif; color:#00ffe7; font-size:2rem; margin-bottom:22px;">App Demo</h2>
+    <p style="color:#e0e6edcc;">Screenshots & demo videos coming soon. Experience smart learning in action.</p>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" style="max-width:900px; margin:80px auto; padding:0 20px;">
+    <h2 style="font-family:'Orbitron',sans-serif; color:#00ffe7; text-align:center; font-size:2rem; margin-bottom:30px;">FAQ</h2>
+    <p><strong>Is Civil Master free?</strong><br>Yes, with premium features planned.</p><br>
+    <p><strong>Which exams are supported?</strong><br>Public Service, BCE, ME Entrance & License exams.</p><br>
+    <p><strong>Is mobile version available?</strong><br>Android & iOS versions are coming soon.</p>
+  </section>
+
+  <!-- Newsletter -->
+  <section id="newsletter" style="text-align:center; margin:80px 20px;">
+    <h2 style="font-family:'Orbitron',sans-serif; color:#00ffe7; font-size:2rem;">Stay Updated</h2>
+    <p style="color:#e0e6edcc;">Subscribe for updates & mobile launch news.</p>
+    <input type="email" placeholder="Your email" style="padding:12px; border-radius:6px; border:none; width:260px;">
+    <br><br>
+    <button class="cta-btn" style="font-size:1rem;">Subscribe</button>
+  </section>
+
+  <!-- Feedback -->
+  <section id="feedback" style="text-align:center; margin:80px 20px;">
+    <h2 style="font-family:'Orbitron',sans-serif; color:#00ffe7; font-size:2rem;">Feedback & Suggestions</h2>
+    <p style="color:#e0e6edcc;"> Help us improve Civil Master.</p>
+    <a href="mailto:civilmaster1614@gmail.com" class="cta-btn" style="font-size:1rem;">Send Feedback</a>
+  </section>
+
+  <section id="download" style="text-align:center; margin: 80px 0;">
+    <h2 style="font-family:'Orbitron',sans-serif; color:#00ffe7; font-size:2rem; margin-bottom:22px;">Ready to Elevate Your Workflow?</h2>
+    <a href="https://civil-master.en.uptodown.com/windows/download" class="cta-btn" style="font-size:1.2rem;">Get Civil Master for Windows</a>
+    <p style="color:#e0e6ed99; margin-top:22px;">Coming soon for ANDROID & IOS </p>
+    <div style="display:flex; justify-content:center; margin-top:40px;">
+      <div class="item">
+        <figure onclick="location.href='https://civil-master.en.uptodown.com/windows';">
+          <img 
+            width="100"
+            height="100"
+            alt="Civil Master icon"
+            loading="lazy"
+            class="app_card_img"
+            src="https://img.utdstc.com/icon/073/1a7/0731a72646eb5db18a8b78c7e505628333ad431d48c825f073b2ae822b302587"
+            srcset="https://img.utdstc.com/icon/073/1a7/0731a72646eb5db18a8b78c7e505628333ad431d48c825f073b2ae822b302587:100 1x, https://img.utdstc.com/icon/073/1a7/0731a72646eb5db18a8b78c7e505628333ad431d48c825f073b2ae822b302587:200 2x, https://img.utdstc.com/icon/073/1a7/0731a72646eb5db18a8b78c7e505628333ad431d48c825f073b2ae822b302587:300 3x">
+        </figure>
+        <div class="name">
+          <a href="https://civil-master.en.uptodown.com/windows" title="Download Civil Master">Civil Master</a>
+        </div>
+        <div class="description">Exam preparation app for Civil Engineers</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" style="text-align:center; margin: 80px 0;">
+    <h2 style="font-family:'Orbitron',sans-serif; color:#00ffe7; font-size:2rem; margin-bottom:18px;">Contact & Support</h2>
+    <p style="color:#e0e6edcc; font-size:1.1rem;">Questions, feedback, or partnership inquiries? <br>Email us at <a href="mailto:civilmaster1614@gmail.com" style="color:#00ffe7; text-decoration:underline;">civilmaster1614@gmail.com</a></p>
+  </section>
+
+  <div class="alien-divider"><span>⚡ KNOWLEDGE TRANSMISSION ⚡</span></div>
+<footer>
+    &copy; 2025 Civil Master. All rights reserved. | Designed for the future.
+  </footer>
+
+<script>
+// Alien Particle Field
+const c=document.getElementById('alienField'),x=c.getContext('2d');function r(){c.width=innerWidth;c.height=innerHeight}r();addEventListener('resize',r);
+const P=[...Array(140)].map(()=>({x:Math.random()*c.width,y:Math.random()*c.height,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*1.4+.4}));
+let mx=0,my=0;addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+(function a(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{const dx=mx-p.x,dy=my-p.y,d=Math.hypot(dx,dy)||1;p.vx+=dx/d*0.0005;p.vy+=dy/d*0.0005;p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;x.beginPath();x.arc(p.x,p.y,p.r,0,6.28);x.fillStyle='#00ffff';x.fill()});requestAnimationFrame(a)})();
+
+// Hologram Scroll Reveal
+const o=new IntersectionObserver(e=>e.forEach(i=>i.isIntersecting&&i.target.classList.add('active')),{threshold:.15});
+document.querySelectorAll('[data-alien]').forEach(el=>o.observe(el));
+
+function toggleToolsDropdown() {
+  var dropdown = document.getElementById('toolsDropdown');
+  dropdown.classList.toggle('open');
+}
+// Close dropdown when clicking outside
+window.addEventListener('click', function(e) {
+  var dropdown = document.getElementById('toolsDropdown');
+  if (!dropdown.contains(e.target)) {
+    dropdown.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

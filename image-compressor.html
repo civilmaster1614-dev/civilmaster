@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Compressor | Civil Master Tools</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --neon: #00ffe7;
+      --bg: #02040a;
+      --card: #050b1f;
+      --accent: #0066ff;
+    }
+    body {
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      background: radial-gradient(circle at top, #040b20, #000);
+      color: #dffcff;
+      min-height: 100vh;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 40px;
+      background: rgba(2,6,20,.7);
+      border-bottom: 1px solid rgba(0,255,255,.2);
+    }
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--neon);
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+    }
+    .back-link {
+      color: #bffcff;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      border: 1px solid var(--neon);
+      border-radius: 8px;
+      padding: 6px 18px;
+      background: rgba(0,255,255,.05);
+      transition: background .2s, color .2s;
+    }
+    .back-link:hover {
+      background: var(--neon);
+      color: #001;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: linear-gradient(145deg, #050b22, #020611);
+      border-radius: 18px;
+      box-shadow: 0 0 40px rgba(0,255,255,.08);
+      padding: 36px 24px 48px 24px;
+    }
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--neon);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .desc {
+      text-align: center;
+      color: #bffcffcc;
+      margin-bottom: 32px;
+    }
+    .drop-area {
+      border: 2px dashed var(--neon);
+      border-radius: 16px;
+      background: rgba(0,255,255,.03);
+      padding: 40px 0;
+      text-align: center;
+      color: #bffcff;
+      font-size: 1.2rem;
+      margin-bottom: 32px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .drop-area.dragover {
+      background: rgba(0,255,255,.08);
+      color: var(--neon);
+    }
+    .images-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 32px;
+      justify-content: center;
+    }
+    .img-card {
+      background: #050b1f;
+      border: 1px solid rgba(0,255,255,.18);
+      border-radius: 14px;
+      padding: 18px 16px 20px 16px;
+      width: 320px;
+      box-shadow: 0 4px 24px rgba(0,255,255,.06);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .img-card .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff0033;
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      z-index: 2;
+      transition: background .2s;
+    }
+    .img-card .remove-btn:hover {
+      background: #ff3366;
+    }
+    .slider-container {
+      width: 100%;
+      margin: 0 auto 12px auto;
+      position: relative;
+      height: 180px;
+      background: #111a2a;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,255,255,.04);
+    }
+    .slider-img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
+    }
+    .slider-img.compressed {
+      clip-path: inset(0 0 0 50%);
+      z-index: 2;
+    }
+    .slider-bar {
+      position: absolute;
+      top: 0; left: 50%;
+      width: 4px;
+      height: 100%;
+      background: var(--neon);
+      z-index: 3;
+      cursor: ew-resize;
+      transition: background .2s;
+    }
+    .slider-handle {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 24px;
+      height: 24px;
+      background: var(--neon);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      border: 2px solid #fff;
+      box-shadow: 0 0 8px var(--neon);
+      cursor: ew-resize;
+    }
+    .img-card .settings {
+      margin: 10px 0 8px 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .img-card label {
+      font-size: 0.98rem;
+      color: #bffcff;
+      margin-bottom: 2px;
+    }
+    .img-card input[type="range"] {
+      width: 100%;
+    }
+    .img-card .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+    .img-card button {
+      background: var(--neon);
+      color: #001;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .img-card button:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .img-card .cropper-tools {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      justify-content: center;
+    }
+    .img-card .cropper-tools button {
+      padding: 5px 10px;
+      font-size: 0.95rem;
+      background: #222b3a;
+      color: var(--neon);
+      border: 1px solid var(--neon);
+      border-radius: 5px;
+      transition: background .2s, color .2s;
+    }
+    .img-card .cropper-tools button.active, .img-card .cropper-tools button:hover {
+      background: var(--neon);
+      color: #001;
+    }
+    .batch-actions {
+      text-align: center;
+      margin: 32px 0 0 0;
+    }
+    .batch-actions button {
+      background: var(--neon);
+      color: #001;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 32px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(0,255,255,.08);
+      transition: background .2s, color .2s;
+    }
+    .batch-actions button:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    @media (max-width: 700px) {
+      .container { padding: 12px 2vw 32px 2vw; }
+      .img-card { width: 98vw; max-width: 340px; }
+      .images-list { gap: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Civil Master Tools</div>
+    <a href="civil_master_website.html" class="back-link">&larr; Back to Home</a>
+  </header>
+  <div class="container">
+    <h1>Image Compressor</h1>
+    <div class="desc">Compress, crop, resize, and optimize your images in bulk. Drag & drop or click to select images. Preview before/after, adjust quality, and download all as ZIP.</div>
+    <div class="drop-area" id="dropArea">Drag & drop images here or click to select</div>
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+    <div class="images-list" id="imagesList"></div>
+    <div class="batch-actions" id="batchActions" style="display:none">
+      <button id="downloadAllBtn">Download All as ZIP</button>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/compressorjs@1.0.6/dist/compressor.min.js"></script>
+  <script>
+// --- Image Compressor Advanced Tool (Compressor.js version) ---
+const dropArea = document.getElementById('dropArea');
+const fileInput = document.getElementById('fileInput');
+const imagesList = document.getElementById('imagesList');
+const batchActions = document.getElementById('batchActions');
+const downloadAllBtn = document.getElementById('downloadAllBtn');
+let images = [];
+
+// --- Drag & Drop ---
+dropArea.addEventListener('click', () => fileInput.click());
+dropArea.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropArea.classList.add('dragover');
+});
+dropArea.addEventListener('dragleave', e => {
+  dropArea.classList.remove('dragover');
+});
+dropArea.addEventListener('drop', e => {
+  e.preventDefault();
+  dropArea.classList.remove('dragover');
+  handleFiles(e.dataTransfer.files);
+});
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(files) {
+  [...files].forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    const imgObj = {
+      name: file.name,
+      file: file,
+      original: URL.createObjectURL(file),
+      compressed: null,
+      compressedBlob: null,
+      quality: 1.0, // Set initial quality to 100%
+      width: null,
+      height: null,
+      crop: null,
+      rotate: 0,
+      originalSize: file.size,
+      compressedSize: null,
+      isCompressed: false,
+      resizeW: null,
+      resizeH: null,
+      isLoaded: false // Track if image is loaded
+    };
+    const img = new window.Image();
+    img.onload = () => {
+      imgObj.width = img.width;
+      imgObj.height = img.height;
+      imgObj.crop = { x: 0, y: 0, w: img.width, h: img.height };
+      imgObj.resizeW = img.width;
+      imgObj.resizeH = img.height;
+      imgObj.isLoaded = true;
+      // Automatically compress after image is loaded
+      compressImage(imgObj, renderImages);
+    };
+    img.src = imgObj.original;
+    images.push(imgObj);
+  });
+  fileInput.value = '';
+  renderImages();
+}
+
+// Ensure Compressor.js is loaded
+if (typeof Compressor !== 'function') {
+  alert('Compressor.js library failed to load. Please check your internet connection or CDN link.');
+}
+
+function compressImage(imgObj, cb) {
+  if (typeof Compressor !== 'function') {
+    alert('Compressor.js is not available.');
+    cb && cb();
+    return;
+  }
+  // If maxSizeKB is set, do binary search for quality
+  if (imgObj.maxSizeKB) {
+    let minQ = 0.1, maxQ = 1.0, bestQ = 1.0, bestBlob = null;
+    let targetBytes = imgObj.maxSizeKB * 1024;
+    let attempts = 0;
+    function tryCompress(q, done) {
+      const options = {
+        quality: q,
+        mimeType: 'image/jpeg',
+        width: imgObj.resizeW || imgObj.width,
+        height: imgObj.resizeH || imgObj.height,
+        rotate: imgObj.rotate || 0,
+        success(result) {
+          // Only apply crop if crop is not the full image
+          const isDefaultCrop = imgObj.crop && imgObj.crop.x === 0 && imgObj.crop.y === 0 && imgObj.crop.w === (imgObj.resizeW || imgObj.width) && imgObj.crop.h === (imgObj.resizeH || imgObj.height);
+          const targetW = imgObj.resizeW || imgObj.width;
+          const targetH = imgObj.resizeH || imgObj.height;
+          const finalize = (blob) => {
+            done(blob);
+          };
+          const doCanvasResize = (srcBlob) => {
+            const img = new window.Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = targetW;
+              canvas.height = targetH;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, targetW, targetH);
+              canvas.toBlob(finalize, 'image/jpeg', q);
+            };
+            img.src = URL.createObjectURL(srcBlob);
+          };
+          if (imgObj.crop && !isDefaultCrop) {
+            const img = new window.Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              canvas.width = imgObj.crop.w;
+              canvas.height = imgObj.crop.h;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, imgObj.crop.x, imgObj.crop.y, imgObj.crop.w, imgObj.crop.h, 0, 0, imgObj.crop.w, imgObj.crop.h);
+              canvas.toBlob(blob => {
+                if (imgObj.crop.w !== targetW || imgObj.crop.h !== targetH) {
+                  doCanvasResize(blob);
+                } else {
+                  finalize(blob);
+                }
+              }, 'image/jpeg', q);
+            };
+            img.src = URL.createObjectURL(result);
+          } else {
+            const img = new window.Image();
+            img.onload = () => {
+              if (img.width !== targetW || img.height !== targetH) {
+                doCanvasResize(result);
+              } else {
+                finalize(result);
+              }
+            };
+            img.src = URL.createObjectURL(result);
+          }
+        },
+        error(e) {
+          done(null);
+        }
+      };
+      new Compressor(imgObj.file, options);
+    }
+    function binarySearchQuality() {
+      if (attempts++ > 8) { // limit attempts
+        if (bestBlob) {
+          imgObj.quality = bestQ;
+          imgObj.compressedBlob = bestBlob;
+          imgObj.compressed = URL.createObjectURL(bestBlob);
+          imgObj.compressedSize = bestBlob.size;
+          imgObj.isCompressed = true;
+        } else {
+          imgObj.maxSizeKB = undefined;
+          setTimeout(() => alert('Cannot compress to the requested file size. Try a larger value.'), 10);
+        }
+        // Always re-enable quality slider and update UI
+        setTimeout(() => {
+          cb && cb();
+        }, 20);
+        return;
+      }
+      let midQ = (minQ + maxQ) / 2;
+      tryCompress(midQ, blob => {
+        if (!blob) {
+          // fallback to last best
+          if (bestBlob) {
+            imgObj.quality = bestQ;
+            imgObj.compressedBlob = bestBlob;
+            imgObj.compressed = URL.createObjectURL(bestBlob);
+            imgObj.compressedSize = bestBlob.size;
+            imgObj.isCompressed = true;
+          } else {
+            imgObj.maxSizeKB = undefined;
+            alert('Cannot compress to the requested file size. Try a larger value.');
+          }
+          cb && cb();
+          return;
+        }
+        if (blob.size <= targetBytes) {
+          bestQ = midQ;
+          bestBlob = blob;
+          minQ = midQ;
+        } else {
+          maxQ = midQ;
+        }
+        if (Math.abs(blob.size - targetBytes) < 1024 || (maxQ - minQ) < 0.01) {
+          imgObj.quality = bestQ;
+          imgObj.compressedBlob = bestBlob;
+          imgObj.compressed = URL.createObjectURL(bestBlob);
+          imgObj.compressedSize = bestBlob.size;
+          imgObj.isCompressed = true;
+          cb && cb();
+        } else {
+          binarySearchQuality();
+        }
+      });
+    }
+    binarySearchQuality();
+    return;
+  }
+  // Always use the original File for compression
+  const options = {
+    quality: imgObj.quality,
+    mimeType: 'image/jpeg',
+    width: imgObj.resizeW || imgObj.width,
+    height: imgObj.resizeH || imgObj.height,
+    rotate: imgObj.rotate || 0,
+    success(result) {
+      // Only apply crop if crop is not the full image
+      const isDefaultCrop = imgObj.crop && imgObj.crop.x === 0 && imgObj.crop.y === 0 && imgObj.crop.w === (imgObj.resizeW || imgObj.width) && imgObj.crop.h === (imgObj.resizeH || imgObj.height);
+      const targetW = imgObj.resizeW || imgObj.width;
+      const targetH = imgObj.resizeH || imgObj.height;
+      const finalize = (blob) => {
+        imgObj.compressedBlob = blob;
+        imgObj.compressed = URL.createObjectURL(blob);
+        imgObj.compressedSize = blob.size;
+        imgObj.isCompressed = true;
+        cb && cb();
+      };
+      const doCanvasResize = (srcBlob) => {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = targetW;
+          canvas.height = targetH;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, targetW, targetH);
+          canvas.toBlob(finalize, 'image/jpeg', imgObj.quality);
+        };
+        img.src = URL.createObjectURL(srcBlob);
+      };
+      if (imgObj.crop && !isDefaultCrop) {
+        const img = new window.Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = imgObj.crop.w;
+          canvas.height = imgObj.crop.h;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, imgObj.crop.x, imgObj.crop.y, imgObj.crop.w, imgObj.crop.h, 0, 0, imgObj.crop.w, imgObj.crop.h);
+          canvas.toBlob(blob => {
+            // After cropping, force resize if needed
+            if (imgObj.crop.w !== targetW || imgObj.crop.h !== targetH) {
+              doCanvasResize(blob);
+            } else {
+              finalize(blob);
+            }
+          }, 'image/jpeg', imgObj.quality);
+        };
+        img.src = URL.createObjectURL(result);
+      } else {
+        // After compression, force resize if needed
+        const img = new window.Image();
+        img.onload = () => {
+          if (img.width !== targetW || img.height !== targetH) {
+            doCanvasResize(result);
+          } else {
+            finalize(result);
+          }
+        };
+        img.src = URL.createObjectURL(result);
+      }
+    },
+    error(e) {
+      alert('Compression failed: ' + e.message);
+      cb && cb();
+    }
+  };
+  new Compressor(imgObj.file, options);
+}
+
+function renderImages() {
+  imagesList.innerHTML = '';
+  images.forEach((imgObj, idx) => {
+    const card = document.createElement('div');
+    card.className = 'img-card';
+    // Remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn';
+    removeBtn.innerHTML = '&times;';
+    removeBtn.onclick = () => { images.splice(idx,1); renderImages(); };
+    card.appendChild(removeBtn);
+    // Info
+    const info = document.createElement('div');
+    info.style.textAlign = 'center';
+    info.style.marginBottom = '10px';
+    info.innerHTML = `<div><strong>${imgObj.name}</strong></div>` +
+      `<div>Original Size: ${(imgObj.originalSize/1024).toFixed(1)} KB</div>` +
+      `<div>Original Dimensions: ${imgObj.width} x ${imgObj.height}</div>` +
+      `<div>Resize To: ${imgObj.resizeW} x ${imgObj.resizeH}</div>` +
+      (imgObj.isCompressed ? `<div>Compressed Size: ${(imgObj.compressedSize/1024).toFixed(1)} KB</div>` : '');
+    card.appendChild(info);
+    // Settings (always visible)
+    const settings = document.createElement('div');
+    settings.className = 'settings';
+    // Quality
+    const qualityLabel = document.createElement('label');
+    qualityLabel.textContent = `Quality: ${(imgObj.quality*100).toFixed(0)}%`;
+    const qualityRange = document.createElement('input');
+    qualityRange.type = 'range';
+    qualityRange.min = 10;
+    qualityRange.max = 100;
+    qualityRange.value = imgObj.quality*100;
+    qualityRange.oninput = e => {
+      imgObj.quality = e.target.value/100;
+      qualityLabel.textContent = `Quality: ${e.target.value}%`;
+    };
+    qualityRange.onchange = e => {
+      imgObj.quality = e.target.value/100;
+      qualityLabel.textContent = `Quality: ${e.target.value}%`;
+      if (imgObj.isCompressed) {
+        imgObj.isCompressed = false;
+        compressImage(imgObj, renderImages);
+      }
+    };
+    // Max file size input
+    const maxSizeLabel = document.createElement('label');
+    maxSizeLabel.textContent = 'Max File Size (KB):';
+    const maxSizeInput = document.createElement('input');
+    maxSizeInput.type = 'number';
+    maxSizeInput.min = 1;
+    maxSizeInput.placeholder = 'e.g. 200';
+    maxSizeInput.style.width = '80px';
+    maxSizeInput.value = imgObj.maxSizeKB || '';
+    maxSizeInput.onchange = e => {
+      const val = parseInt(e.target.value);
+      if (!isNaN(val) && val > 0) {
+        imgObj.maxSizeKB = val;
+        qualityRange.disabled = true;
+        imgObj.isCompressed = false;
+        compressImage(imgObj, renderImages);
+      } else {
+        imgObj.maxSizeKB = undefined;
+        qualityRange.disabled = false;
+        renderImages();
+      }
+    };
+    settings.appendChild(qualityLabel);
+    settings.appendChild(qualityRange);
+    settings.appendChild(maxSizeLabel);
+    settings.appendChild(maxSizeInput);
+    // Resize
+    const resizeLabel = document.createElement('label');
+    resizeLabel.textContent = `Resize (px):`;
+    const resizeW = document.createElement('input');
+    resizeW.type = 'number';
+    resizeW.placeholder = 'Width';
+    resizeW.value = imgObj.resizeW;
+    resizeW.style.width = '60px';
+    resizeW.onchange = e => {
+      let val = parseInt(e.target.value);
+      if (!isNaN(val) && val > 0) imgObj.resizeW = val;
+      else imgObj.resizeW = imgObj.width;
+      // If crop is default (full image), update crop.w
+      if (imgObj.crop && imgObj.crop.x === 0 && imgObj.crop.y === 0) {
+        imgObj.crop.w = imgObj.resizeW;
+      }
+      if (imgObj.isCompressed) {
+        imgObj.isCompressed = false;
+        compressImage(imgObj, renderImages);
+      }
+      renderImages();
+    };
+    const resizeH = document.createElement('input');
+    resizeH.type = 'number';
+    resizeH.placeholder = 'Height';
+    resizeH.value = imgObj.resizeH;
+    resizeH.style.width = '60px';
+    resizeH.onchange = e => {
+      let val = parseInt(e.target.value);
+      if (!isNaN(val) && val > 0) imgObj.resizeH = val;
+      else imgObj.resizeH = imgObj.height;
+      // If crop is default (full image), update crop.h
+      if (imgObj.crop && imgObj.crop.x === 0 && imgObj.crop.y === 0) {
+        imgObj.crop.h = imgObj.resizeH;
+      }
+      if (imgObj.isCompressed) {
+        imgObj.isCompressed = false;
+        compressImage(imgObj, renderImages);
+      }
+      renderImages();
+    };
+    const resizeBox = document.createElement('div');
+    resizeBox.appendChild(resizeW);
+    resizeBox.appendChild(document.createTextNode(' x '));
+    resizeBox.appendChild(resizeH);
+    settings.appendChild(resizeLabel);
+    settings.appendChild(resizeBox);
+    // Crop/Rotate tools
+    const cropperTools = document.createElement('div');
+    cropperTools.className = 'cropper-tools';
+    // Crop
+    const cropBtn = document.createElement('button');
+    cropBtn.textContent = 'Crop';
+    cropBtn.onclick = () => {
+      const x = parseInt(prompt('Crop X (px):', imgObj.crop.x));
+      const y = parseInt(prompt('Crop Y (px):', imgObj.crop.y));
+      const w = parseInt(prompt('Crop Width (px):', imgObj.crop.w));
+      const h = parseInt(prompt('Crop Height (px):', imgObj.crop.h));
+      if (!isNaN(x) && !isNaN(y) && !isNaN(w) && !isNaN(h)) {
+        imgObj.crop = { x, y, w, h };
+        if (imgObj.isCompressed) {
+          imgObj.isCompressed = false;
+          compressImage(imgObj, renderImages);
+        }
+      }
+    };
+    cropperTools.appendChild(cropBtn);
+    // Rotate
+    const rotateBtn = document.createElement('button');
+    rotateBtn.textContent = 'Rotate 90°';
+    rotateBtn.onclick = () => {
+      imgObj.rotate = (imgObj.rotate + 90) % 360;
+      if (imgObj.isCompressed) {
+        imgObj.isCompressed = false;
+        compressImage(imgObj, renderImages);
+      }
+    };
+    cropperTools.appendChild(rotateBtn);
+    settings.appendChild(cropperTools);
+    card.appendChild(settings);
+    // Compress button (only if not compressed)
+    if (!imgObj.isCompressed) {
+      const compressBtn = document.createElement('button');
+      compressBtn.textContent = 'Compress';
+      compressBtn.style.marginTop = '10px';
+      compressBtn.disabled = !imgObj.isLoaded;
+      compressBtn.onclick = () => {
+        if (!imgObj.isLoaded) return;
+        compressImage(imgObj, renderImages);
+      };
+      card.appendChild(compressBtn);
+    }
+    // Show before/after slider only after compression
+    if (imgObj.isCompressed) {
+      const sliderContainer = document.createElement('div');
+      sliderContainer.className = 'slider-container';
+      // Original image
+      const origImg = document.createElement('img');
+      origImg.src = imgObj.original;
+      origImg.className = 'slider-img';
+      sliderContainer.appendChild(origImg);
+      // Compressed image
+      const compImg = document.createElement('img');
+      compImg.src = imgObj.compressed;
+      compImg.className = 'slider-img compressed';
+      sliderContainer.appendChild(compImg);
+      // Slider bar
+      const sliderBar = document.createElement('div');
+      sliderBar.className = 'slider-bar';
+      sliderContainer.appendChild(sliderBar);
+      // Slider handle
+      const sliderHandle = document.createElement('div');
+      sliderHandle.className = 'slider-handle';
+      sliderContainer.appendChild(sliderHandle);
+      // Slider logic
+      let dragging = false;
+      function setSlider(x) {
+        const rect = sliderContainer.getBoundingClientRect();
+        let percent = (x - rect.left) / rect.width;
+        percent = Math.max(0, Math.min(1, percent));
+        compImg.style.clipPath = `inset(0 0 0 ${percent*100}%)`;
+        sliderBar.style.left = `${percent*100}%`;
+        sliderHandle.style.left = `${percent*100}%`;
+      }
+      setSlider(sliderContainer.offsetLeft + sliderContainer.offsetWidth/2);
+      sliderHandle.onmousedown = e => { dragging = true; e.preventDefault(); };
+      document.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        setSlider(e.clientX);
+      });
+      document.addEventListener('mouseup', () => { dragging = false; });
+      sliderContainer.onclick = e => setSlider(e.clientX);
+      card.appendChild(sliderContainer);
+      // Download button
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      const downloadBtn = document.createElement('button');
+      downloadBtn.textContent = 'Download';
+      downloadBtn.onclick = () => {
+        const a = document.createElement('a');
+        a.href = imgObj.compressed;
+        a.download = 'compressed_' + imgObj.name.replace(/\.[^.]+$/, '.jpg');
+        a.click();
+      };
+      actions.appendChild(downloadBtn);
+      card.appendChild(actions);
+    }
+    imagesList.appendChild(card);
+  });
+  batchActions.style.display = images.filter(i => i.isCompressed).length > 1 ? '' : 'none';
+}
+
+downloadAllBtn.onclick = () => {
+  const zip = new JSZip();
+  images.filter(i => i.isCompressed).forEach(imgObj => {
+    zip.file('compressed_' + imgObj.name.replace(/\.[^.]+$/, '.jpg'), imgObj.compressedBlob);
+  });
+  zip.generateAsync({type:'blob'}).then(content => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(content);
+    a.download = 'compressed_images.zip';
+    a.click();
+  });
+};
+  </script>
+</body>
+</html>
