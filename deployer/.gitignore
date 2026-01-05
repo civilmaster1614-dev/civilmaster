@@ -1,0 +1,8 @@
+# Ignore build output and executables
+node_modules/
+deployer/dist/
+deployer-win32-x64/
+*.exe
+*.asar
+.DS_Store
+.env

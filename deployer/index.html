@@ -30,6 +30,12 @@
       <button id="deployBtn">Deploy All</button>
       <button id="pullBtn">Pull</button>
     </div>
+    <div class="row">
+      <button id="selectProjectBtn">Select Project Folder</button>
+      <span id="projectPath" style="font-size:0.9em;color:#8fdfe0;"></span>
+    </div>
+    <div class="row" id="repoInfoRow" style="display:none;"></div>
+    <div class="row" id="fileListRow" style="display:none;"></div>
     <div class="status" id="status"></div>
   </div>
   <script>
@@ -40,32 +46,87 @@
     const status = document.getElementById('status');
     const commitMsg = document.getElementById('commitMsg');
     const pullBtn = document.getElementById('pullBtn');
+    const fileListRow = document.getElementById('fileListRow');
+    const selectProjectBtn = document.getElementById('selectProjectBtn');
+    const projectPath = document.getElementById('projectPath');
+    const repoInfoRow = document.getElementById('repoInfoRow');
+    let currentProject = '';
 
+    async function showFileList() {
+      const files = await window.electronAPI.gitStatus();
+      if (!files.length) {
+        fileListRow.style.display = 'none';
+        fileListRow.innerHTML = '';
+        return;
+      }
+      fileListRow.style.display = '';
+      fileListRow.innerHTML = '<label>Select files to commit:</label>' +
+        files.map(f => `<div><input type='checkbox' class='fileCheck' value='${f.file}' checked> ${f.file} <span style='color:${f.status==='untracked'?'#ffb300':'#8fdfe0'};font-size:0.9em;'>[${f.status}]</span></div>`).join('');
+    }
+
+    async function showRepoInfo() {
+      const remote = await window.electronAPI.getRemoteInfo();
+      const branch = await window.electronAPI.getBranchInfo();
+      if (remote && branch) {
+        repoInfoRow.style.display = '';
+        repoInfoRow.innerHTML = `<b>Remote:</b> <pre style='display:inline;color:#8fdfe0;'>${remote}</pre><br><b>Branch:</b> <span style='color:#8fdfe0;'>${branch}</span>`;
+      } else {
+        repoInfoRow.style.display = 'none';
+        repoInfoRow.innerHTML = '';
+      }
+    }
+
+    // Show file list and repo info on load and after actions
+    showFileList();
+    showRepoInfo();
     addBtn.onclick = async () => {
       status.textContent = 'Adding...';
       status.textContent = await window.electronAPI.gitAdd();
+      await showFileList();
     };
     commitBtn.onclick = async () => {
       if (!commitMsg.value.trim()) { status.textContent = 'Enter a commit message.'; return; }
+      // Get checked files
+      const checked = Array.from(document.querySelectorAll('.fileCheck:checked')).map(cb => cb.value);
+      if (!checked.length) { status.textContent = 'No files selected.'; return; }
+      status.textContent = 'Adding selected files...';
+      await window.electronAPI.gitAddSelected(checked);
       status.textContent = 'Committing...';
       status.textContent = await window.electronAPI.gitCommit(commitMsg.value);
+      await showFileList();
     };
     pushBtn.onclick = async () => {
       status.textContent = 'Pushing...';
       status.textContent = await window.electronAPI.gitPush();
     };
     deployBtn.onclick = async () => {
-      status.textContent = 'Adding...';
-      await window.electronAPI.gitAdd();
+      status.textContent = 'Adding selected files...';
+      const checked = Array.from(document.querySelectorAll('.fileCheck:checked')).map(cb => cb.value);
+      if (!checked.length) { status.textContent = 'No files selected.'; return; }
+      await window.electronAPI.gitAddSelected(checked);
       if (!commitMsg.value.trim()) { status.textContent = 'Enter a commit message.'; return; }
       status.textContent = 'Committing...';
       await window.electronAPI.gitCommit(commitMsg.value);
       status.textContent = 'Pushing...';
       status.textContent = await window.electronAPI.gitPush();
+      await showFileList();
     };
     pullBtn.onclick = async () => {
       status.textContent = 'Pulling...';
       status.textContent = await window.electronAPI.gitPull();
+      await showFileList();
+    };
+    selectProjectBtn.onclick = async () => {
+      const folder = await window.electronAPI.selectProjectFolder();
+      if (folder) {
+        currentProject = folder;
+        projectPath.textContent = `Project: ${folder}`;
+        await showFileList();
+        await showRepoInfo();
+        status.textContent = 'Project folder selected.';
+      } else {
+        status.textContent = 'Project folder selection cancelled.';
+      }
     };
   </script>
 </body>
