@@ -28,6 +28,7 @@
       <button id="commitBtn">Commit</button>
       <button id="pushBtn">Push</button>
       <button id="deployBtn">Deploy All</button>
+      <button id="pullBtn">Pull</button>
     </div>
     <div class="status" id="status"></div>
   </div>
@@ -38,6 +39,7 @@
     const deployBtn = document.getElementById('deployBtn');
     const status = document.getElementById('status');
     const commitMsg = document.getElementById('commitMsg');
+    const pullBtn = document.getElementById('pullBtn');
 
     addBtn.onclick = async () => {
       status.textContent = 'Adding...';
@@ -60,6 +62,10 @@
       await window.electronAPI.gitCommit(commitMsg.value);
       status.textContent = 'Pushing...';
       status.textContent = await window.electronAPI.gitPush();
+    };
+    pullBtn.onclick = async () => {
+      status.textContent = 'Pulling...';
+      status.textContent = await window.electronAPI.gitPull();
     };
   </script>
 </body>

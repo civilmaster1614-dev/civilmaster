@@ -32,6 +32,9 @@ ipcMain.handle('git-commit', async (e, msg) => {
 ipcMain.handle('git-push', async () => {
   return runGit('git push');
 });
+ipcMain.handle('git-pull', async () => {
+  return runGit('git pull');
+});
 
 function runGit(cmd) {
   return new Promise((resolve) => {
