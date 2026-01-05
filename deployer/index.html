@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Pages Deployer</title>
+  <style>
+    body { font-family: 'Roboto', sans-serif; background: #101622; color: #dffcff; margin: 0; padding: 0; }
+    .container { max-width: 400px; margin: 40px auto; background: #181f2e; border-radius: 14px; box-shadow: 0 0 24px #00ffe733; padding: 32px 24px; }
+    h2 { color: #00ffe7; font-family: 'Orbitron', sans-serif; text-align: center; margin-bottom: 18px; }
+    .row { margin-bottom: 18px; }
+    label { display: block; margin-bottom: 6px; color: #bffcff; }
+    input[type=text] { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #00ffe7; background: #101622; color: #dffcff; font-size: 1rem; }
+    button { margin-right: 10px; margin-bottom: 10px; padding: 12px 24px; border-radius: 8px; border: none; background: linear-gradient(135deg,#00ffe7,#0066ff); color: #001; font-weight: 700; font-size: 1rem; cursor: pointer; transition: background .2s; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .status { background: #0a0e18; color: #8fdfe0; border-radius: 8px; padding: 12px; min-height: 60px; margin-top: 18px; font-size: 0.98rem; white-space: pre-line; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>GitHub Pages Deployer</h2>
+    <div class="row">
+      <label for="commitMsg">Commit Message</label>
+      <input type="text" id="commitMsg" placeholder="Describe your update...">
+    </div>
+    <div class="row">
+      <button id="addBtn">Add All</button>
+      <button id="commitBtn">Commit</button>
+      <button id="pushBtn">Push</button>
+      <button id="deployBtn">Deploy All</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+  <script>
+    const addBtn = document.getElementById('addBtn');
+    const commitBtn = document.getElementById('commitBtn');
+    const pushBtn = document.getElementById('pushBtn');
+    const deployBtn = document.getElementById('deployBtn');
+    const status = document.getElementById('status');
+    const commitMsg = document.getElementById('commitMsg');
+
+    addBtn.onclick = async () => {
+      status.textContent = 'Adding...';
+      status.textContent = await window.electronAPI.gitAdd();
+    };
+    commitBtn.onclick = async () => {
+      if (!commitMsg.value.trim()) { status.textContent = 'Enter a commit message.'; return; }
+      status.textContent = 'Committing...';
+      status.textContent = await window.electronAPI.gitCommit(commitMsg.value);
+    };
+    pushBtn.onclick = async () => {
+      status.textContent = 'Pushing...';
+      status.textContent = await window.electronAPI.gitPush();
+    };
+    deployBtn.onclick = async () => {
+      status.textContent = 'Adding...';
+      await window.electronAPI.gitAdd();
+      if (!commitMsg.value.trim()) { status.textContent = 'Enter a commit message.'; return; }
+      status.textContent = 'Committing...';
+      await window.electronAPI.gitCommit(commitMsg.value);
+      status.textContent = 'Pushing...';
+      status.textContent = await window.electronAPI.gitPush();
+    };
+  </script>
+</body>
+</html>

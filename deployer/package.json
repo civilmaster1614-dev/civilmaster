@@ -1,0 +1,16 @@
+{
+  "name": "github-pages-deployer",
+  "version": "1.0.0",
+  "description": "Electron app to deploy GitHub Pages with a modern UI.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build-win": "npm install --save-dev @electron/packager@latest && npx @electron/packager . deployer --platform=win32 --arch=x64 --out=dist --overwrite"
+  },
+  "author": "Civil Master",
+  "license": "MIT",
+  "devDependencies": {
+    "@electron/packager": "^19.0.1",
+    "electron": "^29.0.0"
+  }
+}
